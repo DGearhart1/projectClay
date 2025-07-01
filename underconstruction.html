@@ -87,11 +87,10 @@
     mustardCtx.textAlign = 'center';
     mustardCtx.textBaseline = 'middle';
 
-    // First phrase, two lines, centered near vertical center
     mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 60);
     mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 15);
 
-    // Draw short horizontal line right below first phrase (between lines and second phrase)
+    // Brown line under first phrase
     const lineWidth = width * 0.3;
     const lineX = (width - lineWidth) / 2;
     const lineY = height / 2 + 15;
@@ -113,9 +112,20 @@
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
 
-    // Second phrase split into two lines, positioned below the line on mustard layer
     baseCtx.fillText("UNLIKE OUR", width / 2, height / 2 + 50);
     baseCtx.fillText("CITY'S TRANSPARENCY", width / 2, height / 2 + 90);
+
+    // Mustard line under first phrase (to keep consistent)
+    const lineWidth = width * 0.3;
+    const lineX = (width - lineWidth) / 2;
+    const lineY = height / 2 + 15;
+
+    baseCtx.strokeStyle = '#d2b04c';
+    baseCtx.lineWidth = 3;
+    baseCtx.beginPath();
+    baseCtx.moveTo(lineX, lineY);
+    baseCtx.lineTo(lineX + lineWidth, lineY);
+    baseCtx.stroke();
   }
 
   const bulldozer = {
@@ -191,4 +201,5 @@
 </script>
 </body>
 </html>
+
 
