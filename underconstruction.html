@@ -10,28 +10,14 @@
       padding: 0;
       overflow: hidden;
       height: 100%;
-      background-color: #5a3e1b; /* Brown */
+      background-color: #d2b04c; /* Mustard */
     }
 
     canvas {
-      display: block;
       position: absolute;
       top: 0;
       left: 0;
-    }
-
-    #hidden-message {
-      position: absolute;
-      top: 40%;
-      width: 100%;
-      text-align: center;
-      font-size: clamp(2rem, 5vw, 3rem);
-      color: #d2b04c; /* Mustard */
-      font-family: 'Segoe UI', sans-serif;
-      pointer-events: none;
-      z-index: 3;
-      opacity: 0;
-      transition: opacity 1s ease;
+      display: block;
     }
 
     #construction-header,
@@ -49,18 +35,6 @@
     #construction-footer {
       bottom: 0;
     }
-
-    #pre-message {
-      position: absolute;
-      top: 35%;
-      width: 100%;
-      text-align: center;
-      font-size: clamp(2rem, 6vw, 4rem);
-      color: #d2b04c;
-      font-family: 'Segoe UI', sans-serif;
-      z-index: 5;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -68,124 +42,121 @@
   <img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
   <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
 
-  <!-- Pre-message -->
-  <div id="pre-message">THIS SITE IS UNDER CONSTRUCTION</div>
+  <!-- Brown canvas layer for "underneath" -->
+  <canvas id="base-layer"></canvas>
 
-  <!-- Hidden message under paint -->
-  <div id="hidden-message">Unlike 90% of our city</div>
-
-  <!-- Canvases -->
-  <canvas id="paint-layer"></canvas>
-  <canvas id="dozer-layer"></canvas>
+  <!-- Bulldozer and paint animation canvas -->
+  <canvas id="top-layer"></canvas>
 
   <script>
-    const paintCanvas = document.getElementById('paint-layer');
-    const dozerCanvas = document.getElementById('dozer-layer');
-    const paintCtx = paintCanvas.getContext('2d');
-    const dozerCtx = dozerCanvas.getContext('2d');
-    const message = document.getElementById('hidden-message');
-    const preMessage = document.getElementById('pre-message');
-
-    let width, height;
+    const baseCanvas = document.getElementById('base-layer');
+    const baseCtx = baseCanvas.getContext('2d');
+    const topCanvas = document.getElementById('top-layer');
+    const topCtx = topCanvas.getContext('2d');
 
     const bulldozer = {
-      x: 50,
-      y: 50,
-      vx: 1.2,
-      vy: 1,
-      size: 100,
+      x: 100,
+      y: 100,
+      vx: 1.6,
+      vy: 1.2,
       angle: 0,
+      size: 100,
       img: new Image(),
     };
-
     bulldozer.img.src = 'bulldozer.png';
 
-    function resizeCanvas() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      paintCanvas.width = width;
-      paintCanvas.height = height;
-      dozerCanvas.width = width;
-      dozerCanvas.height = height;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    baseCanvas.width = topCanvas.width = width;
+    baseCanvas.height = topCanvas.height = height;
 
-      // Repaint mustard layer
-      paintCtx.fillStyle = '#d2b04c'; // Mustard
-      paintCtx.fillRect(0, 0, width, height);
+    function drawBase() {
+      // Brown background
+      baseCtx.fillStyle = '#5a3e1b';
+      baseCtx.fillRect(0, 0, width, height);
+
+      // Hidden mustard message
+      baseCtx.fillStyle = '#d2b04c';
+      baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
+      baseCtx.textAlign = 'center';
+      baseCtx.fillText("Unlike 90% of our city", width / 2, height / 2 + 80);
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    function drawTop() {
+      // Mustard overlay
+      topCtx.fillStyle = '#d2b04c';
+      topCtx.fillRect(0, 0, width, height);
 
-    let revealedPixels = 0;
-    const revealThreshold = 0.2;
-    let bulldozerReady = false;
+      // Visible brown message
+      topCtx.fillStyle = '#5a3e1b';
+      topCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+      topCtx.textAlign = 'center';
+      topCtx.fillText("THIS SITE IS UNDER CONSTRUCTION", width / 2, height / 2);
+    }
 
-    function animate() {
-      if (!bulldozerReady) return requestAnimationFrame(animate);
-
-      // Move bulldozer
-      bulldozer.x += bulldozer.vx;
-      bulldozer.y += bulldozer.vy;
-
-      // Bounce and rotate
-      if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) {
-        bulldozer.vx *= -1;
-      }
-      if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) {
-        bulldozer.vy *= -1;
-      }
-
-      // Calculate angle
-      bulldozer.angle = Math.atan2(bulldozer.vy, bulldozer.vx);
-
-      // Erase mustard using destination-out
-      paintCtx.globalCompositeOperation = 'destination-out';
-      paintCtx.beginPath();
-      paintCtx.arc(
+    function clearTopLayerAtDozer() {
+      topCtx.save();
+      topCtx.globalCompositeOperation = 'destination-out';
+      topCtx.beginPath();
+      topCtx.arc(
         bulldozer.x + bulldozer.size / 2,
-        bulldozer.y + bulldozer.size * 0.75,
+        bulldozer.y + bulldozer.size / 2,
         bulldozer.size / 2.5,
         0,
         Math.PI * 2
       );
-      paintCtx.fill();
-      paintCtx.globalCompositeOperation = 'source-over';
+      topCtx.fill();
+      topCtx.restore();
+    }
 
-      // Draw rotated bulldozer
-      dozerCtx.clearRect(0, 0, width, height);
-      dozerCtx.save();
-      dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
-      dozerCtx.rotate(bulldozer.angle);
-      dozerCtx.drawImage(
+    function drawDozer() {
+      topCtx.save();
+      topCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
+      topCtx.rotate(Math.atan2(bulldozer.vy, bulldozer.vx) + Math.PI / 2);
+      topCtx.drawImage(
         bulldozer.img,
         -bulldozer.size / 2,
         -bulldozer.size / 2,
         bulldozer.size,
         bulldozer.size
       );
-      dozerCtx.restore();
+      topCtx.restore();
+    }
 
-      // Reveal hidden message if enough is cleared
-      const imageData = paintCtx.getImageData(0, 0, width, height);
-      let transparentPixels = 0;
-      for (let i = 3; i < imageData.data.length; i += 4) {
-        if (imageData.data[i] === 0) transparentPixels++;
-      }
-      const clearedRatio = transparentPixels / (width * height);
-      if (clearedRatio > revealThreshold) {
-        message.style.opacity = 1;
-      }
+    function animate() {
+      // Move dozer
+      bulldozer.x += bulldozer.vx;
+      bulldozer.y += bulldozer.vy;
+
+      if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) bulldozer.vx *= -1;
+      if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) bulldozer.vy *= -1;
+
+      // Erase mustard
+      clearTopLayerAtDozer();
+
+      // Redraw dozer
+      topCtx.clearRect(0, 0, width, height);
+      drawDozer();
 
       requestAnimationFrame(animate);
     }
 
-    // Delay bulldozer animation
+    function start() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      baseCanvas.width = topCanvas.width = width;
+      baseCanvas.height = topCanvas.height = height;
+      drawBase();
+      drawTop();
+    }
+
+    window.addEventListener('resize', start);
+
     bulldozer.img.onload = () => {
+      start();
       setTimeout(() => {
-        preMessage.style.display = 'none';
-        bulldozerReady = true;
         animate();
-      }, 3000);
+      }, 3000); // 3 second delay
     };
   </script>
 </body>
