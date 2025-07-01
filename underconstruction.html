@@ -81,7 +81,7 @@
 
   window.addEventListener('resize', resize);
 
-  function drawBase() {
+function drawBase() {
   baseCtx.fillStyle = '#5a3e1b';
   baseCtx.fillRect(0, 0, width, height);
 
@@ -90,39 +90,40 @@
   baseCtx.textAlign = 'center';
   baseCtx.textBaseline = 'middle';
 
+  // Two-line second phrase, below the line
   const line1 = "UNLIKE OUR";
   const line2 = "CITY'S TRANSPARENCY";
 
-  const centerY = height / 2 + 80;
+  const startY = height / 2 + 40;
   const lineHeight = 40;
 
-  baseCtx.fillText(line1, width / 2, centerY - lineHeight / 2);
-  baseCtx.fillText(line2, width / 2, centerY + lineHeight / 2);
-
-  const lineWidth = width * 0.3;
-  const lineX = (width - lineWidth) / 2;
-  const lineY = centerY;
-
-  baseCtx.strokeStyle = '#d2b04c';
-  baseCtx.lineWidth = 3;
-  baseCtx.beginPath();
-  baseCtx.moveTo(lineX, lineY);
-  baseCtx.lineTo(lineX + lineWidth, lineY);
-  baseCtx.stroke();
+  baseCtx.fillText(line1, width / 2, startY);
+  baseCtx.fillText(line2, width / 2, startY + lineHeight);
 }
 
-  function drawMustardOverlay() {
-    mustardCtx.fillStyle = '#d2b04c';
-    mustardCtx.fillRect(0, 0, width, height);
+function drawMustardOverlay() {
+  mustardCtx.fillStyle = '#d2b04c';
+  mustardCtx.fillRect(0, 0, width, height);
 
-    // Visible initial message
-    mustardCtx.fillStyle = '#5a3e1b';
-    mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
-    mustardCtx.textAlign = 'center';
-    mustardCtx.textBaseline = 'middle';
-    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
-    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 + 30);
-  }
+  mustardCtx.fillStyle = '#5a3e1b';
+  mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+  mustardCtx.textAlign = 'center';
+  mustardCtx.textBaseline = 'middle';
+  mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 70);
+  mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 20);
+
+  // Draw the line here (between first and second phrase)
+  const lineWidth = width * 0.3;
+  const lineX = (width - lineWidth) / 2;
+  const lineY = height / 2 + 5;
+
+  mustardCtx.strokeStyle = '#5a3e1b';
+  mustardCtx.lineWidth = 3;
+  mustardCtx.beginPath();
+  mustardCtx.moveTo(lineX, lineY);
+  mustardCtx.lineTo(lineX + lineWidth, lineY);
+  mustardCtx.stroke();
+}
 
   const bulldozer = {
     x: 100,
