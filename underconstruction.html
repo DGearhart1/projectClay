@@ -1,111 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Under Construction</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100%;
-      width: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Under Construction with Bulldozer Reveal</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+  }
+  body {
+    background-color: #d2b04c; /* Mustard */
+    position: relative;
+    color: #5a3e1b; /* Brown text */
+  }
 
-    body {
-      background-color: #d2b04c; /* Mustard */
-      position: relative;
-    }
+  /* Container to center text & keep layering right */
+  .container {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
 
-    .reveal-area {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 0%;
-      background-color: #5a3e1b; /* Brown */
-      z-index: 1;
-      animation: wipeReveal 10s linear forwards;
-    }
+  h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.2;
+    user-select: none;
+  }
 
-    .hidden-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: clamp(1.5rem, 4vw, 3rem);
-      color: #d2b04c; /* Mustard on brown */
-      opacity: 0;
-      z-index: 2;
-      text-align: center;
-      animation: fadeIn 10s forwards;
-      animation-delay: 6s;
-    }
+  /* Reveal bar behind the container, animates from left to right */
+  .reveal-bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100vh;
+    width: 0;
+    background-color: #5a3e1b; /* Brown */
+    z-index: 5;
+    pointer-events: none;
+  }
 
-    .bulldozer {
-      position: absolute;
-      width: 100px;
-      bottom: -100px;
-      left: -100px;
-      z-index: 3;
-      animation: driveAround 10s linear infinite;
-    }
+  /* Hidden message to appear after reveal completes */
+  .hidden-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #d2b04c; /* Mustard */
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    opacity: 0;
+    z-index: 15;
+    pointer-events: none;
+  }
 
-    @keyframes driveAround {
-      0% {
-        transform: translate(0, 0) rotate(15deg);
-      }
-      25% {
-        transform: translate(40vw, 20vh) rotate(0deg);
-      }
-      50% {
-        transform: translate(80vw, 60vh) rotate(-10deg);
-      }
-      75% {
-        transform: translate(20vw, 80vh) rotate(5deg);
-      }
-      100% {
-        transform: translate(0, 0) rotate(15deg);
-      }
-    }
+  /* Bulldozer image styling */
+  .bulldozer {
+    position: absolute;
+    width: 100px;
+    height: auto;
+    bottom: 10vh; /* above bottom for breathing room */
+    left: 0;
+    z-index: 20;
+    user-select: none;
+  }
 
-    @keyframes wipeReveal {
-      0% {
-        width: 0%;
-      }
-      100% {
-        width: 100%;
-      }
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
-    }
-
-    .caution-strip {
-      width: 100%;
-      height: auto;
-      position: absolute;
-      top: 0;
-      z-index: 4;
-    }
-
-    .caution-strip-bottom {
-      top: auto;
-      bottom: 0;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="reveal-area"></div>
+
+  <div class="reveal-bar"></div>
   <div class="hidden-message">Unlike 90% of our city</div>
 
-  <img src="dozer.png" alt="Bulldozer" class="bulldozer" />
-  <img src="caution-tape.png" alt="Caution tape" class="caution-strip" />
-  <img src="caution-tape.png" alt="Caution tape" class="caution-strip caution-strip-bottom" />
+  <div class="container">
+    <h1>This Page Is<br>Under Construction</h1>
+  </div>
+
+  <img src="bulldozer.png" alt="Bulldozer" class="bulldozer" />
+
+<script>
+  const revealBar = document.querySelector('.reveal-bar');
+  const bulldozer = document.querySelector('.bulldozer');
+  const hiddenMessage = document.querySelector('.hidden-message');
+
+  // Animation config
+  const duration = 10000; // 10 seconds full cycle
+  let start = null;
+
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    const elapsed = timestamp - start;
+    const progress = elapsed / duration; // 0 to 1
+
+    // Bulldozer drives from left(0) to right(90vw), then loops
+    const maxLeft = window.innerWidth * 0.9;
+    const bulldozerX = progress * maxLeft;
+    bulldozer.style.left = bulldozerX + 'px';
+
+    // Reveal bar width grows from 0% to 100%
+    revealBar.style.width = (progress * 100) + 'vw';
+
+    // Show hidden message fading in after 60% progress
+    if (progress > 0.6) {
+      hiddenMessage.style.opacity = (progress - 0.6) / 0.4;
+    } else {
+      hiddenMessage.style.opacity = 0;
+    }
+
+    // Reset and loop animation when done
+    if (elapsed < duration) {
+      requestAnimationFrame(animate);
+    } else {
+      // reset
+      start = null;
+      hiddenMessage.style.opacity = 0;
+      revealBar.style.width = '0vw';
+      bulldozer.style.left = '0px';
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+</script>
+
 </body>
 </html>
