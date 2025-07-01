@@ -82,16 +82,34 @@
   window.addEventListener('resize', resize);
 
   function drawBase() {
-    baseCtx.fillStyle = '#5a3e1b';
-    baseCtx.fillRect(0, 0, width, height);
+  baseCtx.fillStyle = '#5a3e1b';
+  baseCtx.fillRect(0, 0, width, height);
 
-    // Hidden message revealed by bulldozer
-    baseCtx.fillStyle = '#d2b04c';
-    baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
-    baseCtx.textAlign = 'center';
-    baseCtx.textBaseline = 'middle';
-    baseCtx.fillText("UNLIKE OUR CITY’S TRANSPARENCY", width / 2, height / 2 + 80);
-  }
+  baseCtx.fillStyle = '#d2b04c';
+  baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
+  baseCtx.textAlign = 'center';
+  baseCtx.textBaseline = 'middle';
+
+  const line1 = "UNLIKE OUR";
+  const line2 = "CITY'S TRANSPARENCY";
+
+  const centerY = height / 2 + 80;
+  const lineHeight = 40;
+
+  baseCtx.fillText(line1, width / 2, centerY - lineHeight / 2);
+  baseCtx.fillText(line2, width / 2, centerY + lineHeight / 2);
+
+  const lineWidth = width * 0.3;
+  const lineX = (width - lineWidth) / 2;
+  const lineY = centerY;
+
+  baseCtx.strokeStyle = '#d2b04c';
+  baseCtx.lineWidth = 3;
+  baseCtx.beginPath();
+  baseCtx.moveTo(lineX, lineY);
+  baseCtx.lineTo(lineX + lineWidth, lineY);
+  baseCtx.stroke();
+}
 
   function drawMustardOverlay() {
     mustardCtx.fillStyle = '#d2b04c';
