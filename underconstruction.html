@@ -1,40 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Bulldozer Mustard Scraper</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden; height: 100%;
-    background-color: #d2b04c;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  canvas {
-    position: absolute;
-    top: 0; left: 0;
-    display: block;
-    pointer-events: none;
-  }
-  #construction-header,
-  #construction-footer {
-    position: absolute;
-    width: 100%;
-    height: auto;
-    z-index: 10;
-  }
-  #construction-header { top: 0; }
-  #construction-footer { bottom: 0; }
-  #base-layer { z-index: 1; }
-  #mustard-layer { z-index: 5; }
-  #dozer-layer { z-index: 8; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Bulldozer Mustard Scraper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; height: 100%;
+      background-color: #d2b04c;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    canvas {
+      position: absolute;
+      top: 0; left: 0;
+      display: block;
+      pointer-events: none;
+    }
+    #construction-header,
+    #construction-footer {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      z-index: 10;
+    }
+    #construction-header { top: 0; }
+    #construction-footer { bottom: 0; }
+
+    #disclaimer {
+      position: absolute;
+      bottom: 45px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #5a3e1b;
+      background-color: rgba(210, 176, 76, 0.8); /* semi-transparent mustard */
+      padding: 4px 0;
+      z-index: 11;
+    }
+
+    #base-layer { z-index: 1; }
+    #mustard-layer { z-index: 5; }
+    #dozer-layer { z-index: 8; }
+  </style>
 </head>
 <body>
 
 <!-- Caution tape banners -->
 <img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
 <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
+
+<!-- Legal disclaimer -->
+<div id="disclaimer">
+  This site is privately owned and is not in support of any candidate.
+</div>
 
 <!-- Canvases -->
 <canvas id="base-layer"></canvas>
@@ -67,23 +85,25 @@
     baseCtx.fillStyle = '#5a3e1b';
     baseCtx.fillRect(0, 0, width, height);
 
+    // Hidden message revealed by bulldozer
     baseCtx.fillStyle = '#d2b04c';
     baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
-    baseCtx.fillText("Unlike 90% of our city", width / 2, height / 2 + 80);
+    baseCtx.fillText("UNLIKE OUR CITY’S TRANSPARENCY", width / 2, height / 2 + 80);
   }
 
   function drawMustardOverlay() {
     mustardCtx.fillStyle = '#d2b04c';
     mustardCtx.fillRect(0, 0, width, height);
 
+    // Visible initial message
     mustardCtx.fillStyle = '#5a3e1b';
     mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
     mustardCtx.textAlign = 'center';
     mustardCtx.textBaseline = 'middle';
     mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
-    mustardCtx.fillText("UNDER CONSTRUCTION", width / 2, height / 2 + 30);
+    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 + 30);
   }
 
   const bulldozer = {
@@ -111,14 +131,14 @@
     mustardCtx.fill();
     mustardCtx.restore();
 
-    // Also draw mustard-colored text in that spot (so it reappears on brown)
+    // Redraw top line in mustard on base as it's revealed
     baseCtx.save();
     baseCtx.fillStyle = '#d2b04c';
     baseCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
     baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
-    baseCtx.fillText("UNDER CONSTRUCTION", width / 2, height / 2 + 30);
+    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 + 30);
     baseCtx.restore();
   }
 
@@ -126,8 +146,7 @@
     dozerCtx.clearRect(0, 0, width, height);
     dozerCtx.save();
     dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
-    // Adjust rotation: facing forward + 90° counterclockwise
-    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI;
+    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI; // 90° counterclockwise
     dozerCtx.rotate(angle);
     dozerCtx.drawImage(
       bulldozer.img,
@@ -155,7 +174,7 @@
     resize();
     setTimeout(() => {
       animate();
-    }, 2000); // 2 seconds delay
+    }, 2000);
   };
 </script>
 </body>
