@@ -87,13 +87,14 @@
     mustardCtx.textAlign = 'center';
     mustardCtx.textBaseline = 'middle';
 
-    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 60);
-    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 15);
+    // Move up a bit from center for top phrase
+    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 90);
+    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 40);
 
-    // Brown line under first phrase
+    // Brown horizontal line under top phrase
     const lineWidth = width * 0.3;
     const lineX = (width - lineWidth) / 2;
-    const lineY = height / 2 + 15;
+    const lineY = height / 2 - 15;
 
     mustardCtx.strokeStyle = '#5a3e1b';
     mustardCtx.lineWidth = 3;
@@ -108,17 +109,23 @@
     baseCtx.fillRect(0, 0, width, height);
 
     baseCtx.fillStyle = '#d2b04c';
-    baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
+    baseCtx.font = `bold clamp(1.8rem, 5vw, 3rem) 'Segoe UI', sans-serif`;
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
 
-    baseCtx.fillText("UNLIKE OUR", width / 2, height / 2 + 50);
-    baseCtx.fillText("CITY'S TRANSPARENCY", width / 2, height / 2 + 90);
+    // Three lines for second phrase below the line
+    const lines = ["to illuminate", "the lack of", "transparency"];
+    const startY = height / 2 + 15; // just below line in mustard layer
+    const lineHeight = 40;
 
-    // Mustard line under first phrase (to keep consistent)
+    for (let i = 0; i < lines.length; i++) {
+      baseCtx.fillText(lines[i], width / 2, startY + i * lineHeight);
+    }
+
+    // Mustard line under top phrase (same position as mustard overlay line)
     const lineWidth = width * 0.3;
     const lineX = (width - lineWidth) / 2;
-    const lineY = height / 2 + 15;
+    const lineY = height / 2 - 15;
 
     baseCtx.strokeStyle = '#d2b04c';
     baseCtx.lineWidth = 3;
@@ -159,8 +166,8 @@
     baseCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
-    baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 60);
-    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 15);
+    baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 90);
+    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 40);
     baseCtx.restore();
   }
 
@@ -201,5 +208,3 @@
 </script>
 </body>
 </html>
-
-
