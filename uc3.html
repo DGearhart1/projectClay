@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bulldozer Mustard Scraper with Lamp</title>
+  <title>Bulldozer Mustard Scraper with Lamp Spotlight</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body {
@@ -36,13 +36,12 @@
       background-color: rgba(210, 176, 76, 0.8);
       padding: 4px 0;
       z-index: 11;
-      user-select: none;
     }
 
     #base-layer { z-index: 1; }
     #mustard-layer { z-index: 5; }
     #dozer-layer { z-index: 8; }
-    #lamp-layer { z-index: 9; }
+    #lamp-layer { z-index: 15; }
   </style>
 </head>
 <body>
@@ -152,25 +151,8 @@
     size: 100,
     img: new Image(),
   };
+
   bulldozer.img.src = 'bulldozer.png';
-
-  // Lamp setup & animation variables
-  const lampImgs = [];
-  for (let i = 1; i <= 4; i++) {
-    const img = new Image();
-    img.src = `lamp${i}.png`;
-    lampImgs.push(img);
-  }
-
-  let lampX = -100;
-  let lampY = 0;
-  let lampFrame = 0;
-  let lampTimer = 0;
-  let lampPhase = 0; // 0 = hopping in, 1 = pause, 2 = turn & shine light
-
-  // Dozer and lamp control
-  let startTime;
-  let lampActive = false;
 
   function eraseMustardAtDozer() {
     mustardCtx.save();
@@ -213,24 +195,39 @@
     dozerCtx.restore();
   }
 
+  let bulldozerStartTime;
+  let bulldozerRunning = true;
+
+  // Lamp setup
+  const lampImgs = [];
+  for (let i = 1; i <= 4; i++) {
+    let img = new Image();
+    img.src = `lamp${i}.png`;
+    lampImgs.push(img);
+  }
+
+  let lampX = -150; // start offscreen left
+  let lampY = height / 2 + 15; // align vertically with "TO ILLUMINATE"
+  let lampFrame = 0;
+  let lampTimer = 0;
+  let lampPhase = 0; // 0=waiting,1=hopping in,2=looking around,3=shining light
+
   function drawLamp() {
     lampCtx.clearRect(0, 0, width, height);
     lampCtx.save();
 
-    // Position lamp on lampX, lampY
     lampCtx.translate(lampX, lampY);
 
-    // Lamp frame animation (0-3 cycling)
     lampCtx.drawImage(lampImgs[lampFrame], 0, 0, 100, 100);
 
-    // If shining light, draw spotlight cone
-    if (lampPhase === 2) {
-      lampCtx.fillStyle = 'rgba(255, 255, 200, 0.3)';
+    if (lampPhase === 3) {
+      // Spotlight cone aligned with lamp bulb
+      lampCtx.fillStyle = 'rgba(255, 255, 200, 0.25)';
       lampCtx.beginPath();
-      lampCtx.moveTo(50, 50);
-      lampCtx.lineTo(300, 100);
-      lampCtx.lineTo(300, 300);
-      lampCtx.lineTo(50, 300);
+      lampCtx.moveTo(50, 65);  // near lamp bulb bottom center-ish
+      lampCtx.lineTo(230, 100);
+      lampCtx.lineTo(230, 280);
+      lampCtx.lineTo(50, 280);
       lampCtx.closePath();
       lampCtx.fill();
     }
@@ -242,39 +239,52 @@
     lampTimer++;
 
     if (lampPhase === 0) {
-      // Hop in from left, moving lampX right and cycling frames for bounce
-      lampX += 5;
-      if (lampTimer % 5 === 0) {
-        lampFrame = (lampFrame + 1) % 4;
-      }
-      if (lampX >= width / 3) {
-        lampPhase = 1; // pause phase
+      // Wait 2 seconds before hopping in
+      if (lampTimer > 120) {
+        lampPhase = 1;
         lampTimer = 0;
       }
     } else if (lampPhase === 1) {
-      // Pause looking at user
-      if (lampTimer > 60) { // about 1 second at 60fps
+      // Hop in slower
+      lampX += 2.5;
+      if (lampTimer % 6 === 0) {
+        lampFrame = (lampFrame + 1) % 4;
+      }
+      if (lampX >= width / 3) {
         lampPhase = 2;
         lampTimer = 0;
       }
     } else if (lampPhase === 2) {
-      // Shine light phase - stay here forever or loop if you want
-      // For fun, flicker spotlight opacity
+      // Look left-right shake for ~2 seconds
+      const shakeAmplitude = 5;
+      const shakeSpeed = 0.15;
+      lampX = width / 3 + Math.sin(lampTimer * shakeSpeed) * shakeAmplitude;
+
+      if (lampTimer > 120) {
+        lampPhase = 3;
+        lampTimer = 0;
+        lampX = width / 3;
+      }
+    } else if (lampPhase === 3) {
+      // Steady shining phase - keep lamp steady and spotlight on
       drawLamp();
-      return; // skip drawLamp again below
+      return;
     }
 
     drawLamp();
   }
 
-  function animate() {
-    const now = Date.now();
+  function animate(time) {
+    if (!bulldozerStartTime) bulldozerStartTime = time;
+    const elapsed = (time - bulldozerStartTime) / 1000; // seconds elapsed
 
-    if (!startTime) startTime = now;
+    if (elapsed < 25) {
+      bulldozerRunning = true;
+    } else {
+      bulldozerRunning = false;
+    }
 
-    const elapsed = now - startTime;
-
-    if (!lampActive && elapsed < 25000) {  // bulldozer runs 25 seconds
+    if (bulldozerRunning) {
       bulldozer.x += bulldozer.vx;
       bulldozer.y += bulldozer.vy;
 
@@ -283,21 +293,11 @@
 
       eraseMustardAtDozer();
       drawBulldozer();
-    } else if (!lampActive) {
-      lampActive = true;
-      // Reset lamp animation states
-      lampX = -100;
-      lampY = height / 2 + 40;
-      lampFrame = 0;
-      lampTimer = 0;
-      lampPhase = 0;
+    } else {
+      dozerCtx.clearRect(0, 0, width, height); // clear bulldozer when stopped
     }
 
-    if (lampActive) {
-      animateLamp();
-    } else {
-      lampCtx.clearRect(0, 0, width, height);
-    }
+    animateLamp();
 
     requestAnimationFrame(animate);
   }
@@ -306,8 +306,9 @@
     resize();
     setTimeout(() => {
       animate();
-    }, 2000);
+    }, 2000); // bulldozer starts after 2 seconds
   };
+
 </script>
 </body>
 </html>
