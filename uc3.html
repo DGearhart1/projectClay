@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bulldozer with Lamp Animation</title>
+  <title>Bulldozer Mustard Scraper + Lamp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body {
@@ -37,6 +37,11 @@
       padding: 4px 0;
       z-index: 11;
     }
+
+    #base-layer { z-index: 1; }
+    #mustard-layer { z-index: 5; }
+    #dozer-layer { z-index: 8; }
+    #lamp-layer { z-index: 9; }
   </style>
 </head>
 <body>
@@ -45,138 +50,186 @@
 <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
 <div id="disclaimer">This site is privately owned and is not in support of any candidate.</div>
 
-<canvas id="scene"></canvas>
+<canvas id="base-layer"></canvas>
+<canvas id="mustard-layer"></canvas>
+<canvas id="dozer-layer"></canvas>
+<canvas id="lamp-layer"></canvas>
+
 <script>
-const canvas = document.getElementById('scene');
-const ctx = canvas.getContext('2d');
-let width = window.innerWidth;
-let height = window.innerHeight;
-canvas.width = width;
-canvas.height = height;
+  const baseCanvas = document.getElementById('base-layer');
+  const mustardCanvas = document.getElementById('mustard-layer');
+  const dozerCanvas = document.getElementById('dozer-layer');
+  const lampCanvas = document.getElementById('lamp-layer');
 
-// Load bulldozer image
-const dozerImg = new Image();
-dozerImg.src = 'bulldozer.png';
+  const baseCtx = baseCanvas.getContext('2d');
+  const mustardCtx = mustardCanvas.getContext('2d');
+  const dozerCtx = dozerCanvas.getContext('2d');
+  const lampCtx = lampCanvas.getContext('2d');
 
-// Load lamp frames
-const lampFrames = [
-  'lamp1.png', 'lamp2.png', 'lamp3.png', 'lamp4.png'
-].map(src => {
-  const img = new Image();
-  img.src = src;
-  return img;
-});
-
-let dozer = { x: 50, y: 100, vx: 1.5, vy: 1.2, size: 100 };
-let clearedArea = ctx.createImageData(width, height);
-let lampX = -100;
-let lampY = height - 150;
-let lampFrameIndex = 0;
-let lampActive = false;
-let lampTimer = 0;
-
-function drawBackground() {
-  ctx.fillStyle = '#5a3e1b';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = '#d2b04c';
-  ctx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText('THIS SITE IS UNDER RENOVATION', width/2, height/2 - 40);
-
-  // line
-  ctx.beginPath();
-  ctx.moveTo(width/2 - 100, height/2 - 20);
-  ctx.lineTo(width/2 + 100, height/2 - 20);
-  ctx.strokeStyle = '#d2b04c';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // message
-  ctx.fillText('TO ILLUMINATE', width/2, height/2 + 20);
-  ctx.fillText('THE LACK OF', width/2, height/2 + 60);
-  ctx.fillText('TRANSPARENCY', width/2, height/2 + 100);
-}
-
-function eraseTrail(x, y) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath();
-  ctx.arc(x + 50, y + 75, 50, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawDozer() {
-  ctx.save();
-  ctx.translate(dozer.x + dozer.size/2, dozer.y + dozer.size/2);
-  const angle = Math.atan2(dozer.vy, dozer.vx) - Math.PI;
-  ctx.rotate(angle);
-  ctx.drawImage(dozerImg, -dozer.size/2, -dozer.size/2, dozer.size, dozer.size);
-  ctx.restore();
-}
-
-function updateDozer() {
-  dozer.x += dozer.vx;
-  dozer.y += dozer.vy;
-
-  if (dozer.x < 0 || dozer.x + dozer.size > width) dozer.vx *= -1;
-  if (dozer.y < 0 || dozer.y + dozer.size > height) dozer.vy *= -1;
-}
-
-function allRevealedCheck() {
-  // Fake condition: after ~10 seconds, assume cleared
-  return Date.now() - startTime > 10000;
-}
-
-function drawLamp() {
-  const frame = lampFrames[lampFrameIndex % lampFrames.length];
-  ctx.drawImage(frame, lampX, lampY, 80, 120);
-}
-
-function animateLamp() {
-  if (!lampActive) return;
-  lampTimer++;
-
-  if (lampX < width / 2 - 40) {
-    if (lampTimer % 10 === 0) lampFrameIndex++;
-    lampX += 3;
-    lampY = height - 150 + Math.sin(lampX / 20) * 10;
-  } else if (lampTimer < 240) {
-    if (lampTimer === 100) lampFrameIndex = 3; // turn to viewer
-    if (lampTimer === 160) lampFrameIndex = 0; // turn back
-  } else {
-    // Spotlight effect
-    ctx.save();
-    const grd = ctx.createRadialGradient(lampX + 40, lampY + 20, 5, lampX + 40, lampY + 60, 200);
-    grd.addColorStop(0, 'rgba(255, 255, 150, 0.6)');
-    grd.addColorStop(1, 'rgba(255, 255, 150, 0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(lampX + 40, lampY + 60, 200, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.restore();
+  let width, height;
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    [baseCanvas, mustardCanvas, dozerCanvas, lampCanvas].forEach(c => {
+      c.width = width;
+      c.height = height;
+    });
+    drawBase();
+    drawMustardOverlay();
   }
-  drawLamp();
-}
+  window.addEventListener('resize', resize);
 
-let startTime = Date.now();
-function animate() {
-  ctx.clearRect(0, 0, width, height);
-  drawBackground();
-  eraseTrail(dozer.x, dozer.y);
-  drawDozer();
-  updateDozer();
+  function drawMustardOverlay() {
+    mustardCtx.fillStyle = '#d2b04c';
+    mustardCtx.fillRect(0, 0, width, height);
+    mustardCtx.fillStyle = '#5a3e1b';
+    mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+    mustardCtx.textAlign = 'center';
+    mustardCtx.textBaseline = 'middle';
+    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 90);
+    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 40);
 
-  if (!lampActive && allRevealedCheck()) {
-    lampActive = true;
+    const lineWidth = width * 0.3;
+    const lineX = (width - lineWidth) / 2;
+    const lineY = height / 2 - 15;
+    mustardCtx.strokeStyle = '#5a3e1b';
+    mustardCtx.lineWidth = 3;
+    mustardCtx.beginPath();
+    mustardCtx.moveTo(lineX, lineY);
+    mustardCtx.lineTo(lineX + lineWidth, lineY);
+    mustardCtx.stroke();
   }
-  animateLamp();
-  requestAnimationFrame(animate);
-}
 
-dozerImg.onload = () => {
-  animate();
-};
+  function drawBase() {
+    baseCtx.fillStyle = '#5a3e1b';
+    baseCtx.fillRect(0, 0, width, height);
+    baseCtx.fillStyle = '#d2b04c';
+    baseCtx.font = `bold clamp(1.8rem, 5vw, 3rem) 'Segoe UI', sans-serif`;
+    baseCtx.textAlign = 'center';
+    baseCtx.textBaseline = 'middle';
+    const lines = ["to illuminate", "the lack of", "transparency"];
+    const startY = height / 2 + 15;
+    const lineHeight = 40;
+    for (let i = 0; i < lines.length; i++) {
+      baseCtx.fillText(lines[i].toUpperCase(), width / 2, startY + i * lineHeight);
+    }
+    const lineWidth = width * 0.3;
+    const lineX = (width - lineWidth) / 2;
+    const lineY = height / 2 - 15;
+    baseCtx.strokeStyle = '#d2b04c';
+    baseCtx.lineWidth = 3;
+    baseCtx.beginPath();
+    baseCtx.moveTo(lineX, lineY);
+    baseCtx.lineTo(lineX + lineWidth, lineY);
+    baseCtx.stroke();
+  }
+
+  const bulldozer = {
+    x: 100, y: 100, vx: 1.6, vy: 1.2, size: 100,
+    img: new Image(),
+  };
+  bulldozer.img.src = 'bulldozer.png';
+
+  const lampFrames = ['lamp1.png', 'lamp2.png', 'lamp3.png', 'lamp4.png'].map(src => {
+    const img = new Image();
+    img.src = src;
+    return img;
+  });
+
+  let lampX = -100;
+  let lampY = 0;
+  let lampFrame = 0;
+  let lampTimer = 0;
+  let lampActive = false;
+
+  function eraseMustardAtDozer() {
+    mustardCtx.save();
+    mustardCtx.globalCompositeOperation = 'destination-out';
+    mustardCtx.beginPath();
+    mustardCtx.arc(
+      bulldozer.x + bulldozer.size / 2,
+      bulldozer.y + bulldozer.size * 0.75,
+      bulldozer.size / 2.5, 0, 2 * Math.PI
+    );
+    mustardCtx.fill();
+    mustardCtx.restore();
+
+    baseCtx.save();
+    baseCtx.fillStyle = '#d2b04c';
+    baseCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+    baseCtx.textAlign = 'center';
+    baseCtx.textBaseline = 'middle';
+    baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 90);
+    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 40);
+    baseCtx.restore();
+  }
+
+  function drawBulldozer() {
+    dozerCtx.clearRect(0, 0, width, height);
+    dozerCtx.save();
+    dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
+    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI;
+    dozerCtx.rotate(angle);
+    dozerCtx.drawImage(
+      bulldozer.img,
+      -bulldozer.size / 2,
+      -bulldozer.size / 2,
+      bulldozer.size,
+      bulldozer.size
+    );
+    dozerCtx.restore();
+  }
+
+  function animateLamp() {
+    lampCtx.clearRect(0, 0, width, height);
+    if (!lampActive) return;
+
+    if (lampX < width / 2 - 40) {
+      lampX += 3;
+      lampY = height - 150 + Math.sin(lampX / 20) * 10;
+      lampFrame = Math.floor((lampX / 10) % 3);
+    } else {
+      lampFrame = 3;
+      lampTimer++;
+
+      // spotlight
+      lampCtx.save();
+      const grd = lampCtx.createRadialGradient(lampX + 40, lampY + 20, 5, lampX + 40, lampY + 60, 200);
+      grd.addColorStop(0, 'rgba(255, 255, 150, 0.6)');
+      grd.addColorStop(1, 'rgba(255, 255, 150, 0)');
+      lampCtx.fillStyle = grd;
+      lampCtx.beginPath();
+      lampCtx.arc(lampX + 40, lampY + 60, 200, 0, 2 * Math.PI);
+      lampCtx.fill();
+      lampCtx.restore();
+    }
+    lampCtx.drawImage(lampFrames[lampFrame], lampX, lampY, 80, 120);
+  }
+
+  let stopTime = 0;
+  function animate() {
+    const elapsed = Date.now() - stopTime;
+    if (!lampActive && elapsed < 10000) {
+      bulldozer.x += bulldozer.vx;
+      bulldozer.y += bulldozer.vy;
+      if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) bulldozer.vx *= -1;
+      if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) bulldozer.vy *= -1;
+      eraseMustardAtDozer();
+      drawBulldozer();
+    } else if (!lampActive) {
+      lampActive = true;
+    }
+    animateLamp();
+    requestAnimationFrame(animate);
+  }
+
+  bulldozer.img.onload = () => {
+    resize();
+    stopTime = Date.now();
+    setTimeout(() => {
+      animate();
+    }, 2000);
+  };
 </script>
 </body>
 </html>
