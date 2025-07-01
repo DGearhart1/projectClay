@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Bulldozer Reveal</title>
+<title>Bulldozer Mustard Scraper</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   html, body {
@@ -11,17 +11,23 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   canvas {
-    position: absolute; top: 0; left: 0; display: block;
+    position: absolute;
+    top: 0; left: 0;
+    display: block;
+    pointer-events: none;
   }
   #construction-header,
   #construction-footer {
     position: absolute;
     width: 100%;
     height: auto;
-    z-index: 5;
+    z-index: 10;
   }
   #construction-header { top: 0; }
   #construction-footer { bottom: 0; }
+  #base-layer { z-index: 1; }
+  #mustard-layer { z-index: 5; }
+  #dozer-layer { z-index: 8; }
 </style>
 </head>
 <body>
@@ -30,122 +36,130 @@
 <img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
 <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
 
-<canvas id="base-layer"></canvas>  <!-- Brown base with hidden message -->
-<canvas id="top-layer"></canvas>   <!-- Mustard overlay and bulldozer -->
+<!-- Three canvases -->
+<canvas id="base-layer"></canvas>      <!-- Brown base + hidden mustard text -->
+<canvas id="mustard-layer"></canvas>   <!-- Mustard overlay + brown text -->
+<canvas id="dozer-layer"></canvas>     <!-- Bulldozer -->
 
 <script>
-const baseCanvas = document.getElementById('base-layer');
-const baseCtx = baseCanvas.getContext('2d');
-const topCanvas = document.getElementById('top-layer');
-const topCtx = topCanvas.getContext('2d');
+  const baseCanvas = document.getElementById('base-layer');
+  const mustardCanvas = document.getElementById('mustard-layer');
+  const dozerCanvas = document.getElementById('dozer-layer');
 
-const bulldozer = {
-  x: 100,
-  y: 100,
-  vx: 1.6,
-  vy: 1.2,
-  angle: 0,
-  size: 100,
-  img: new Image(),
-};
-bulldozer.img.src = 'bulldozer.png';
+  const baseCtx = baseCanvas.getContext('2d');
+  const mustardCtx = mustardCanvas.getContext('2d');
+  const dozerCtx = dozerCanvas.getContext('2d');
 
-let width = window.innerWidth;
-let height = window.innerHeight;
+  let width, height;
 
-function resize() {
-  width = window.innerWidth;
-  height = window.innerHeight;
-  baseCanvas.width = topCanvas.width = width;
-  baseCanvas.height = topCanvas.height = height;
-  drawBase();
-  drawTop();
-}
-window.addEventListener('resize', resize);
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    baseCanvas.width = mustardCanvas.width = dozerCanvas.width = width;
+    baseCanvas.height = mustardCanvas.height = dozerCanvas.height = height;
+    drawBase();
+    drawMustardOverlay();
+  }
 
-// Draw the brown background and hidden mustard message
-function drawBase() {
-  baseCtx.fillStyle = '#5a3e1b'; // Brown
-  baseCtx.fillRect(0, 0, width, height);
+  window.addEventListener('resize', resize);
 
-  baseCtx.fillStyle = '#d2b04c'; // Mustard text
-  baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
-  baseCtx.textAlign = 'center';
-  baseCtx.textBaseline = 'middle';
-  baseCtx.fillText("Unlike 90% of our city", width / 2, height / 2 + 80);
-}
+  // Draw brown base with hidden mustard text
+  function drawBase() {
+    baseCtx.fillStyle = '#5a3e1b'; // Brown
+    baseCtx.fillRect(0, 0, width, height);
 
-// Draw the mustard overlay and "THIS SITE IS UNDER CONSTRUCTION" in brown, two lines
-function drawTop() {
-  topCtx.fillStyle = '#d2b04c'; // Mustard overlay
-  topCtx.fillRect(0, 0, width, height);
+    baseCtx.fillStyle = '#d2b04c'; // Mustard text
+    baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
+    baseCtx.textAlign = 'center';
+    baseCtx.textBaseline = 'middle';
+    baseCtx.fillText("Unlike 90% of our city", width / 2, height / 2 + 80);
+  }
 
-  topCtx.fillStyle = '#5a3e1b'; // Brown text
-  topCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
-  topCtx.textAlign = 'center';
-  topCtx.textBaseline = 'middle';
-  // Two lines, spaced nicely
-  topCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
-  topCtx.fillText("UNDER CONSTRUCTION", width / 2, height / 2 + 30);
-}
+  // Draw mustard overlay with brown two-line text (draw once)
+  function drawMustardOverlay() {
+    mustardCtx.fillStyle = '#d2b04c'; // Mustard
+    mustardCtx.fillRect(0, 0, width, height);
 
-// Erase mustard where bulldozer bucket passes (revealing brown below)
-function clearMustardAtDozer() {
-  topCtx.save();
-  topCtx.globalCompositeOperation = 'destination-out';
-  topCtx.beginPath();
-  topCtx.arc(
-    bulldozer.x + bulldozer.size / 2,
-    bulldozer.y + bulldozer.size * 0.75,
-    bulldozer.size / 2.5,
-    0,
-    Math.PI * 2
-  );
-  topCtx.fill();
-  topCtx.restore();
-}
+    mustardCtx.fillStyle = '#5a3e1b'; // Brown text
+    mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+    mustardCtx.textAlign = 'center';
+    mustardCtx.textBaseline = 'middle';
+    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
+    mustardCtx.fillText("UNDER CONSTRUCTION", width / 2, height / 2 + 30);
+  }
 
-// Draw rotated bulldozer correctly aligned with travel direction
-function drawBulldozer() {
-  topCtx.save();
-  topCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
-  // Rotate so image points along velocity vector; subtract 90 degrees to fix orientation
-  topCtx.rotate(Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI / 2);
-  topCtx.drawImage(
-    bulldozer.img,
-    -bulldozer.size / 2,
-    -bulldozer.size / 2,
-    bulldozer.size,
-    bulldozer.size
-  );
-  topCtx.restore();
-}
+  // Bulldozer setup
+  const bulldozer = {
+    x: 100,
+    y: 100,
+    vx: 1.6,
+    vy: 1.2,
+    size: 100,
+    img: new Image(),
+  };
 
-function animate() {
-  // Move bulldozer
-  bulldozer.x += bulldozer.vx;
-  bulldozer.y += bulldozer.vy;
+  bulldozer.img.src = 'bulldozer.png';
 
-  // Bounce on edges
-  if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) bulldozer.vx *= -1;
-  if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) bulldozer.vy *= -1;
+  // Erase mustard ONLY where bulldozer bucket passes (revealing brown base)
+  function eraseMustardAtDozer() {
+    mustardCtx.save();
+    mustardCtx.globalCompositeOperation = 'destination-out';
+    // Circle positioned near bottom center of bulldozer for bucket effect
+    mustardCtx.beginPath();
+    mustardCtx.arc(
+      bulldozer.x + bulldozer.size / 2,
+      bulldozer.y + bulldozer.size * 0.75,
+      bulldozer.size / 2.5,
+      0,
+      2 * Math.PI
+    );
+    mustardCtx.fill();
+    mustardCtx.restore();
+  }
 
-  // Erase mustard where bucket passes
-  clearMustardAtDozer();
+  // Draw bulldozer rotated based on velocity
+  function drawBulldozer() {
+    dozerCtx.clearRect(0, 0, width, height);
+    dozerCtx.save();
+    dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
+    // Rotate so bulldozer points along velocity vector - adjust angle if needed
+    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI / 2;
+    dozerCtx.rotate(angle);
+    dozerCtx.drawImage(
+      bulldozer.img,
+      -bulldozer.size / 2,
+      -bulldozer.size / 2,
+      bulldozer.size,
+      bulldozer.size
+    );
+    dozerCtx.restore();
+  }
 
-  // Clear dozer canvas and redraw dozer
-  topCtx.clearRect(0, 0, width, height);
-  drawBulldozer();
+  // Animation loop
+  function animate() {
+    // Move bulldozer
+    bulldozer.x += bulldozer.vx;
+    bulldozer.y += bulldozer.vy;
 
-  requestAnimationFrame(animate);
-}
+    // Bounce off edges
+    if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) bulldozer.vx *= -1;
+    if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) bulldozer.vy *= -1;
 
-bulldozer.img.onload = () => {
-  resize();
-  setTimeout(() => {
-    animate();
-  }, 2000); // 2 seconds delay before starting dozer
-};
+    // Erase mustard only under bucket
+    eraseMustardAtDozer();
+
+    // Draw bulldozer
+    drawBulldozer();
+
+    requestAnimationFrame(animate);
+  }
+
+  bulldozer.img.onload = () => {
+    resize();
+    setTimeout(() => {
+      animate();
+    }, 2000); // 2-second delay before start
+  };
 </script>
 </body>
 </html>
