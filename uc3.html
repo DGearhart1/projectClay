@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bulldozer with Lamp Animation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; height: 100%;
+      background-color: #d2b04c;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    canvas {
+      position: absolute;
+      top: 0; left: 0;
+      display: block;
+      pointer-events: none;
+    }
+    #construction-header,
+    #construction-footer {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      z-index: 10;
+    }
+    #construction-header { top: 0; }
+    #construction-footer { bottom: 0; }
+
+    #disclaimer {
+      position: absolute;
+      bottom: 45px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #5a3e1b;
+      background-color: rgba(210, 176, 76, 0.8);
+      padding: 4px 0;
+      z-index: 11;
+    }
+  </style>
+</head>
+<body>
+
+<img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
+<img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
+<div id="disclaimer">This site is privately owned and is not in support of any candidate.</div>
+
+<canvas id="scene"></canvas>
+<script>
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+let width = window.innerWidth;
+let height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
+
+// Load bulldozer image
+const dozerImg = new Image();
+dozerImg.src = 'bulldozer.png';
+
+// Load lamp frames
+const lampFrames = [
+  'lamp1.png', 'lamp2.png', 'lamp3.png', 'lamp4.png'
+].map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
+
+let dozer = { x: 50, y: 100, vx: 1.5, vy: 1.2, size: 100 };
+let clearedArea = ctx.createImageData(width, height);
+let lampX = -100;
+let lampY = height - 150;
+let lampFrameIndex = 0;
+let lampActive = false;
+let lampTimer = 0;
+
+function drawBackground() {
+  ctx.fillStyle = '#5a3e1b';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#d2b04c';
+  ctx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('THIS SITE IS UNDER RENOVATION', width/2, height/2 - 40);
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(width/2 - 100, height/2 - 20);
+  ctx.lineTo(width/2 + 100, height/2 - 20);
+  ctx.strokeStyle = '#d2b04c';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // message
+  ctx.fillText('TO ILLUMINATE', width/2, height/2 + 20);
+  ctx.fillText('THE LACK OF', width/2, height/2 + 60);
+  ctx.fillText('TRANSPARENCY', width/2, height/2 + 100);
+}
+
+function eraseTrail(x, y) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(x + 50, y + 75, 50, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawDozer() {
+  ctx.save();
+  ctx.translate(dozer.x + dozer.size/2, dozer.y + dozer.size/2);
+  const angle = Math.atan2(dozer.vy, dozer.vx) - Math.PI;
+  ctx.rotate(angle);
+  ctx.drawImage(dozerImg, -dozer.size/2, -dozer.size/2, dozer.size, dozer.size);
+  ctx.restore();
+}
+
+function updateDozer() {
+  dozer.x += dozer.vx;
+  dozer.y += dozer.vy;
+
+  if (dozer.x < 0 || dozer.x + dozer.size > width) dozer.vx *= -1;
+  if (dozer.y < 0 || dozer.y + dozer.size > height) dozer.vy *= -1;
+}
+
+function allRevealedCheck() {
+  // Fake condition: after ~10 seconds, assume cleared
+  return Date.now() - startTime > 10000;
+}
+
+function drawLamp() {
+  const frame = lampFrames[lampFrameIndex % lampFrames.length];
+  ctx.drawImage(frame, lampX, lampY, 80, 120);
+}
+
+function animateLamp() {
+  if (!lampActive) return;
+  lampTimer++;
+
+  if (lampX < width / 2 - 40) {
+    if (lampTimer % 10 === 0) lampFrameIndex++;
+    lampX += 3;
+    lampY = height - 150 + Math.sin(lampX / 20) * 10;
+  } else if (lampTimer < 240) {
+    if (lampTimer === 100) lampFrameIndex = 3; // turn to viewer
+    if (lampTimer === 160) lampFrameIndex = 0; // turn back
+  } else {
+    // Spotlight effect
+    ctx.save();
+    const grd = ctx.createRadialGradient(lampX + 40, lampY + 20, 5, lampX + 40, lampY + 60, 200);
+    grd.addColorStop(0, 'rgba(255, 255, 150, 0.6)');
+    grd.addColorStop(1, 'rgba(255, 255, 150, 0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(lampX + 40, lampY + 60, 200, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+  drawLamp();
+}
+
+let startTime = Date.now();
+function animate() {
+  ctx.clearRect(0, 0, width, height);
+  drawBackground();
+  eraseTrail(dozer.x, dozer.y);
+  drawDozer();
+  updateDozer();
+
+  if (!lampActive && allRevealedCheck()) {
+    lampActive = true;
+  }
+  animateLamp();
+  requestAnimationFrame(animate);
+}
+
+dozerImg.onload = () => {
+  animate();
+};
+</script>
+</body>
+</html>
