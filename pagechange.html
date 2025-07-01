@@ -1,35 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Message from Clay</title>
-  <meta http-equiv="refresh" content="20; url=pageray.html">
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="12;url=pageray.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Message to City Leadership</title>
   <style>
     body {
-      background-color: #fff6dc;
-      color: #5c3a0f;
-      font-family: Georgia, serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: Arial, sans-serif;
       text-align: center;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
+      padding: 40px;
+      background-color: #fdf6e3;
+      color: #333;
     }
-
     h1 {
-      font-size: 2em;
-      max-width: 800px;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    #countdown {
+      font-size: 1.2em;
+      color: #aa0000;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
-<h1>
-  To the mayor, city manager, and members of the city council:<br><br>
-  From the citizens of Clay who are fed up with a government that obscures the truth,<br><br>
-  buries records, and treats its people with contempt...<br><br>
-  change is coming.
-</h1>
-  </body>
+  <h1>To the mayor, city manager, and members of the city council:</h1>
+  <p>From the citizens of Clay who are fed up with a government that obscures the truth, buries records, and treats its people with contempt...</p>
+  <p><strong>Know this — change is coming.</strong></p>
+  
+  <div id="countdown">Redirecting in 12 seconds...</div>
+
+  <script>
+    let secondsLeft = 12;
+    const countdownEl = document.getElementById('countdown');
+
+    const timer = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft > 0) {
+        countdownEl.textContent = `Redirecting in ${secondsLeft} seconds...`;
+      } else {
+        clearInterval(timer);
+      }
+    }, 1000);
+  </script>
+</body>
 </html>
