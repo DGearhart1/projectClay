@@ -114,13 +114,16 @@
     baseCtx.textBaseline = 'middle';
 
     // Three lines for second phrase below the line
-    const lines = ["to illuminate", "the lack of", "transparency"];
-    const startY = height / 2 + 15; // just below line in mustard layer
-    const lineHeight = 40;
+    const lines = [
+  "to illuminate",
+  "the lack of",
+  "transparency"
+];
 
-    for (let i = 0; i < lines.length; i++) {
-      baseCtx.fillText(lines[i], width / 2, startY + i * lineHeight);
-    }
+// Change to uppercase when drawing
+for (let i = 0; i < lines.length; i++) {
+  baseCtx.fillText(lines[i].toUpperCase(), width / 2, startY + i * lineHeight);
+}
 
     // Mustard line under top phrase (same position as mustard overlay line)
     const lineWidth = width * 0.3;
