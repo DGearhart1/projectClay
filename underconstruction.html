@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bulldozer Paint Trail</title>
+<title>Under Construction with Moving Reveal</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%; width: 100%;
@@ -11,107 +11,160 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   body {
-    background-color: #d2b04c; /* Mustard */
+    background-color: #5a3e1b; /* Brown background */
     position: relative;
-    color: #5a3e1b; /* Brown */
+    color: #d2b04c; /* Mustard text */
   }
+
   .container {
     position: relative;
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
   }
-  /* Paint trail that follows bulldozer */
-  .paint-trail {
+
+  /* Mustard overlay covering entire page */
+  .mustard-overlay {
     position: absolute;
-    bottom: 80px; /* adjust to bulldozer height */
-    left: 0;
-    width: 150px;
-    height: 120px;
-    background-color: #5a3e1b; /* Brown */
-    border-radius: 20px 20px 10px 10px;
-    filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #d2b04c; /* Mustard */
+    pointer-events: none;
+    /* The hole will be created dynamically in JS */
   }
-  /* Bulldozer */
-  .bulldozer {
-    position: absolute;
-    bottom: 0;
-    width: 150px;
-    height: auto;
-    user-select: none;
-    z-index: 10;
-  }
-  /* Text on top */
+
+  /* Text on top, centered */
   .text-container {
     position: absolute;
     top: 30vh;
     width: 100%;
     text-align: center;
     pointer-events: none;
-    z-index: 20;
+    z-index: 10;
   }
   .text-container h1 {
     font-size: clamp(2rem, 6vw, 4rem);
     font-weight: bold;
     text-transform: uppercase;
     margin: 0;
-    color: #5a3e1b;
+    line-height: 1.2;
     user-select: none;
+    color: #d2b04c; /* mustard on brown */
+    text-shadow: 1px 1px 2px #3a2e14;
   }
+
+  /* Hidden message */
   .hidden-message {
     position: absolute;
     top: 60vh;
     width: 100%;
     text-align: center;
     font-size: clamp(1.5rem, 4vw, 3rem);
-    color: #d2b04c;
+    color: #d2b04c; /* Mustard */
     opacity: 0;
     pointer-events: none;
     transition: opacity 1s ease;
+    user-select: none;
+    z-index: 10;
+  }
+
+  /* Bulldozer image */
+  .bulldozer {
+    position: absolute;
+    width: 120px;
+    height: auto;
+    user-select: none;
+    z-index: 20;
   }
 </style>
 </head>
 <body>
   <div class="container">
-    <div class="paint-trail"></div>
-    <img src="bulldozer.png" alt="Bulldozer" class="bulldozer" />
+    <div class="mustard-overlay"></div>
+
     <div class="text-container">
       <h1>This Page Is<br>Under Construction</h1>
     </div>
+
     <div class="hidden-message">Unlike 90% of our city</div>
+
+    <img src="bulldozer.png" alt="Bulldozer" class="bulldozer" />
   </div>
 
 <script>
   const bulldozer = document.querySelector('.bulldozer');
-  const paintTrail = document.querySelector('.paint-trail');
+  const mustardOverlay = document.querySelector('.mustard-overlay');
   const hiddenMessage = document.querySelector('.hidden-message');
 
+  // We'll create an SVG mask dynamically to cut a hole in mustardOverlay where the bulldozer is
+  // This approach uses CSS clip-path with an inset circle at the bulldozer's center
+
+  const bulldozerSize = 120; // width in px
+
+  // Animate bulldozer position over a path covering the viewport
+  const pathPoints = [
+    {x: 50, y: 80},
+    {x: 80, y: 50},
+    {x: 60, y: 20},
+    {x: 30, y: 40},
+    {x: 10, y: 60},
+    {x: 20, y: 80},
+    {x: 50, y: 80} // back to start for smooth loop
+  ];
+
+  const container = document.querySelector('.container');
   const containerWidth = window.innerWidth;
   const containerHeight = window.innerHeight;
 
   let startTime = null;
-  const duration = 12000; // 12 seconds to complete one full pass
+  const duration = 12000; // 12 seconds full loop
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  // Interpolate between points for smooth motion
+  function interpolatePath(t) {
+    // t is 0..1, total path length is points.length - 1 segments
+    const segmentCount = pathPoints.length - 1;
+    const totalT = t * segmentCount;
+    const segmentIndex = Math.floor(totalT);
+    const segmentT = totalT - segmentIndex;
+
+    const p0 = pathPoints[segmentIndex];
+    const p1 = pathPoints[(segmentIndex + 1) % pathPoints.length];
+
+    return {
+      x: lerp(p0.x, p1.x, segmentT),
+      y: lerp(p0.y, p1.y, segmentT)
+    };
+  }
 
   function animate(time) {
     if (!startTime) startTime = time;
-    const elapsed = time - startTime;
-    let progress = (elapsed % duration) / duration; // loop 0..1
+    const elapsed = (time - startTime) % duration;
+    const progress = elapsed / duration;
 
-    // Bulldozer drives horizontally from left to right and back
-    let x;
-    if (progress <= 0.5) {
-      x = progress * 2 * (containerWidth - bulldozer.clientWidth);
-    } else {
-      x = (1 - ((progress - 0.5) * 2)) * (containerWidth - bulldozer.clientWidth);
-    }
+    // Get bulldozer position as % of viewport
+    const pos = interpolatePath(progress);
 
-    bulldozer.style.left = `${x}px`;
+    // Position bulldozer (translate % to px minus half width/height for center)
+    const bulldozerX = (pos.x / 100) * containerWidth - bulldozerSize / 2;
+    const bulldozerY = (pos.y / 100) * containerHeight - bulldozerSize / 2;
 
-    // Paint trail matches bulldozer's horizontal position, slightly above it
-    paintTrail.style.left = `${x}px`;
+    bulldozer.style.left = bulldozerX + 'px';
+    bulldozer.style.top = bulldozerY + 'px';
 
-    // Show hidden message after 75% progress
-    if (progress > 0.75) {
-      hiddenMessage.style.opacity = (progress - 0.75) / 0.25;
+    // Create clip-path circle to punch hole in mustard overlay at bulldozer position
+    // Radius about half bulldozer width plus a bit for smoothness
+    const radius = bulldozerSize * 0.6;
+
+    mustardOverlay.style.clipPath = `circle(${radius}px at ${bulldozerX + bulldozerSize/2}px ${bulldozerY + bulldozerSize/2}px)`;
+
+    // Show hidden message starting after 70% progress
+    if (progress > 0.7) {
+      hiddenMessage.style.opacity = (progress - 0.7) / 0.3;
     } else {
       hiddenMessage.style.opacity = 0;
     }
@@ -119,11 +172,14 @@
     requestAnimationFrame(animate);
   }
 
-  window.addEventListener('resize', () => {
-    // Just in case window size changes
-  });
-
+  // Start animation
   requestAnimationFrame(animate);
+
+  // Adjust on resize
+  window.addEventListener('resize', () => {
+    containerWidth = window.innerWidth;
+    containerHeight = window.innerHeight;
+  });
 </script>
 </body>
 </html>
