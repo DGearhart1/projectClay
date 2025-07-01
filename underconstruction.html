@@ -3,133 +3,127 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Under Construction with Bulldozer Reveal</title>
+<title>Bulldozer Paint Trail</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%; width: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   body {
     background-color: #d2b04c; /* Mustard */
     position: relative;
-    color: #5a3e1b; /* Brown text */
+    color: #5a3e1b; /* Brown */
   }
-
-  /* Container to center text & keep layering right */
   .container {
     position: relative;
-    z-index: 10;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
+    width: 100vw;
   }
-
-  h1 {
-    font-size: clamp(2rem, 6vw, 4rem);
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin: 0;
-    line-height: 1.2;
-    user-select: none;
-  }
-
-  /* Reveal bar behind the container, animates from left to right */
-  .reveal-bar {
+  /* Paint trail that follows bulldozer */
+  .paint-trail {
     position: absolute;
-    top: 0; left: 0;
-    height: 100vh;
-    width: 0;
+    bottom: 80px; /* adjust to bulldozer height */
+    left: 0;
+    width: 150px;
+    height: 120px;
     background-color: #5a3e1b; /* Brown */
-    z-index: 5;
-    pointer-events: none;
+    border-radius: 20px 20px 10px 10px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
   }
-
-  /* Hidden message to appear after reveal completes */
-  .hidden-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #d2b04c; /* Mustard */
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    opacity: 0;
-    z-index: 15;
-    pointer-events: none;
-  }
-
-  /* Bulldozer image styling */
+  /* Bulldozer */
   .bulldozer {
     position: absolute;
-    width: 100px;
+    bottom: 0;
+    width: 150px;
     height: auto;
-    bottom: 10vh; /* above bottom for breathing room */
-    left: 0;
+    user-select: none;
+    z-index: 10;
+  }
+  /* Text on top */
+  .text-container {
+    position: absolute;
+    top: 30vh;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
     z-index: 20;
+  }
+  .text-container h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+    color: #5a3e1b;
     user-select: none;
   }
-
+  .hidden-message {
+    position: absolute;
+    top: 60vh;
+    width: 100%;
+    text-align: center;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    color: #d2b04c;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+  }
 </style>
 </head>
 <body>
-
-  <div class="reveal-bar"></div>
-  <div class="hidden-message">Unlike 90% of our city</div>
-
   <div class="container">
-    <h1>This Page Is<br>Under Construction</h1>
+    <div class="paint-trail"></div>
+    <img src="bulldozer.png" alt="Bulldozer" class="bulldozer" />
+    <div class="text-container">
+      <h1>This Page Is<br>Under Construction</h1>
+    </div>
+    <div class="hidden-message">Unlike 90% of our city</div>
   </div>
 
-  <img src="bulldozer.png" alt="Bulldozer" class="bulldozer" />
-
 <script>
-  const revealBar = document.querySelector('.reveal-bar');
   const bulldozer = document.querySelector('.bulldozer');
+  const paintTrail = document.querySelector('.paint-trail');
   const hiddenMessage = document.querySelector('.hidden-message');
 
-  // Animation config
-  const duration = 10000; // 10 seconds full cycle
-  let start = null;
+  const containerWidth = window.innerWidth;
+  const containerHeight = window.innerHeight;
 
-  function animate(timestamp) {
-    if (!start) start = timestamp;
-    const elapsed = timestamp - start;
-    const progress = elapsed / duration; // 0 to 1
+  let startTime = null;
+  const duration = 12000; // 12 seconds to complete one full pass
 
-    // Bulldozer drives from left(0) to right(90vw), then loops
-    const maxLeft = window.innerWidth * 0.9;
-    const bulldozerX = progress * maxLeft;
-    bulldozer.style.left = bulldozerX + 'px';
+  function animate(time) {
+    if (!startTime) startTime = time;
+    const elapsed = time - startTime;
+    let progress = (elapsed % duration) / duration; // loop 0..1
 
-    // Reveal bar width grows from 0% to 100%
-    revealBar.style.width = (progress * 100) + 'vw';
+    // Bulldozer drives horizontally from left to right and back
+    let x;
+    if (progress <= 0.5) {
+      x = progress * 2 * (containerWidth - bulldozer.clientWidth);
+    } else {
+      x = (1 - ((progress - 0.5) * 2)) * (containerWidth - bulldozer.clientWidth);
+    }
 
-    // Show hidden message fading in after 60% progress
-    if (progress > 0.6) {
-      hiddenMessage.style.opacity = (progress - 0.6) / 0.4;
+    bulldozer.style.left = `${x}px`;
+
+    // Paint trail matches bulldozer's horizontal position, slightly above it
+    paintTrail.style.left = `${x}px`;
+
+    // Show hidden message after 75% progress
+    if (progress > 0.75) {
+      hiddenMessage.style.opacity = (progress - 0.75) / 0.25;
     } else {
       hiddenMessage.style.opacity = 0;
     }
 
-    // Reset and loop animation when done
-    if (elapsed < duration) {
-      requestAnimationFrame(animate);
-    } else {
-      // reset
-      start = null;
-      hiddenMessage.style.opacity = 0;
-      revealBar.style.width = '0vw';
-      bulldozer.style.left = '0px';
-      requestAnimationFrame(animate);
-    }
+    requestAnimationFrame(animate);
   }
+
+  window.addEventListener('resize', () => {
+    // Just in case window size changes
+  });
 
   requestAnimationFrame(animate);
 </script>
-
 </body>
 </html>
