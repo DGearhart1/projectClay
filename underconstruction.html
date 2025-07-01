@@ -17,8 +17,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      position: relative;
-      overflow: hidden;
+      text-align: center;
     }
     .caution-strip {
       width: 100%;
@@ -32,34 +31,31 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
-      text-align: center;
     }
     h1 {
       font-size: clamp(2rem, 6vw, 4rem);
       font-weight: bold;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      margin: 0;
+      margin: 0 0 20px 0;
       line-height: 1.2;
     }
-    .machine {
-      position: absolute;
-      bottom: 0;
-      max-width: 25vw;
+    .machines {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .machines img {
+      max-width: 30vw;
       height: auto;
-      opacity: 0.7;
-    }
-    .bulldozer {
-      left: 0;
-    }
-    .backhoe {
-      right: 0;
-      transform: scaleX(-1); /* optional: face it inward */
+      opacity: 0.8;
     }
     @media (max-width: 600px) {
-      .machine {
+      .machines img {
         max-width: 40vw;
-        opacity: 0.5;
+        opacity: 0.6;
       }
     }
   </style>
@@ -69,11 +65,13 @@
 
   <div class="content">
     <h1>This Page Is<br>Under Construction</h1>
+    <div class="machines">
+      <img src="dozer.png" alt="Bulldozer" />
+      <img src="backhoe.png" alt="Backhoe" />
+    </div>
   </div>
 
   <img src="caution-tape.png" alt="Caution tape" class="caution-strip" />
-
-  <img src="dozer.png" alt="Bulldozer" class="machine bulldozer" />
-  <img src="backhoe.png" alt="Backhoe" class="machine backhoe" />
 </body>
 </html>
+
