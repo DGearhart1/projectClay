@@ -5,73 +5,107 @@
   <title>Under Construction</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      background-color: #d2b04c; /* Mustard */
-      color: #5a3e1b; /* Brown */
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      text-align: center;
     }
+
+    body {
+      background-color: #d2b04c; /* Mustard */
+      position: relative;
+    }
+
+    .reveal-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background-color: #5a3e1b; /* Brown */
+      z-index: 1;
+      animation: wipeReveal 10s linear forwards;
+    }
+
+    .hidden-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: #d2b04c; /* Mustard on brown */
+      opacity: 0;
+      z-index: 2;
+      text-align: center;
+      animation: fadeIn 10s forwards;
+      animation-delay: 6s;
+    }
+
+    .bulldozer {
+      position: absolute;
+      width: 100px;
+      bottom: -100px;
+      left: -100px;
+      z-index: 3;
+      animation: driveAround 10s linear infinite;
+    }
+
+    @keyframes driveAround {
+      0% {
+        transform: translate(0, 0) rotate(15deg);
+      }
+      25% {
+        transform: translate(40vw, 20vh) rotate(0deg);
+      }
+      50% {
+        transform: translate(80vw, 60vh) rotate(-10deg);
+      }
+      75% {
+        transform: translate(20vw, 80vh) rotate(5deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(15deg);
+      }
+    }
+
+    @keyframes wipeReveal {
+      0% {
+        width: 0%;
+      }
+      100% {
+        width: 100%;
+      }
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
     .caution-strip {
       width: 100%;
       height: auto;
-      display: block;
+      position: absolute;
+      top: 0;
+      z-index: 4;
     }
-    .content {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: clamp(2rem, 6vw, 4rem);
-      font-weight: bold;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin: 0 0 20px 0;
-      line-height: 1.2;
-    }
-    .machines {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .machines img {
-      max-width: 30vw;
-      height: auto;
-      opacity: 0.8;
-    }
-    @media (max-width: 600px) {
-      .machines img {
-        max-width: 40vw;
-        opacity: 0.6;
-      }
+
+    .caution-strip-bottom {
+      top: auto;
+      bottom: 0;
     }
   </style>
 </head>
 <body>
-  <img src="caution-tape.png" alt="Caution tape" class="caution-strip" />
+  <div class="reveal-area"></div>
+  <div class="hidden-message">Unlike 90% of our city</div>
 
-  <div class="content">
-    <h1>This Page Is<br>Under Construction</h1>
-    <div class="machines">
-      <img src="dozer.png" alt="Bulldozer" />
-      <img src="backhoe.png" alt="Backhoe" />
-    </div>
-  </div>
-
+  <img src="dozer.png" alt="Bulldozer" class="bulldozer" />
   <img src="caution-tape.png" alt="Caution tape" class="caution-strip" />
+  <img src="caution-tape.png" alt="Caution tape" class="caution-strip caution-strip-bottom" />
 </body>
 </html>
-
