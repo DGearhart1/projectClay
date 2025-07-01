@@ -29,33 +29,72 @@
       color: #d2b04c; /* Mustard */
       font-family: 'Segoe UI', sans-serif;
       pointer-events: none;
-      z-index: 2;
+      z-index: 3;
       opacity: 0;
       transition: opacity 1s ease;
+    }
+
+    #construction-header,
+    #construction-footer {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      z-index: 4;
+    }
+
+    #construction-header {
+      top: 0;
+    }
+
+    #construction-footer {
+      bottom: 0;
+    }
+
+    #pre-message {
+      position: absolute;
+      top: 35%;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(2rem, 6vw, 4rem);
+      color: #d2b04c;
+      font-family: 'Segoe UI', sans-serif;
+      z-index: 5;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
+  <!-- Banners -->
+  <img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
+  <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
+
+  <!-- Pre-message -->
+  <div id="pre-message">THIS SITE IS UNDER CONSTRUCTION</div>
+
+  <!-- Hidden message under paint -->
   <div id="hidden-message">Unlike 90% of our city</div>
+
+  <!-- Canvases -->
   <canvas id="paint-layer"></canvas>
   <canvas id="dozer-layer"></canvas>
 
   <script>
     const paintCanvas = document.getElementById('paint-layer');
     const dozerCanvas = document.getElementById('dozer-layer');
-    const message = document.getElementById('hidden-message');
     const paintCtx = paintCanvas.getContext('2d');
     const dozerCtx = dozerCanvas.getContext('2d');
+    const message = document.getElementById('hidden-message');
+    const preMessage = document.getElementById('pre-message');
 
     let width, height;
 
-    // Dozer properties
     const bulldozer = {
       x: 50,
       y: 50,
-      vx: 2,
-      vy: 1.5,
+      vx: 1.2,
+      vy: 1,
       size: 100,
+      angle: 0,
       img: new Image(),
     };
 
@@ -78,18 +117,28 @@
     resizeCanvas();
 
     let revealedPixels = 0;
-    let revealThreshold = 0.2; // Show message after 20% cleared
+    const revealThreshold = 0.2;
+    let bulldozerReady = false;
 
     function animate() {
+      if (!bulldozerReady) return requestAnimationFrame(animate);
+
       // Move bulldozer
       bulldozer.x += bulldozer.vx;
       bulldozer.y += bulldozer.vy;
 
-      // Bounce off edges
-      if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) bulldozer.vx *= -1;
-      if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) bulldozer.vy *= -1;
+      // Bounce and rotate
+      if (bulldozer.x <= 0 || bulldozer.x + bulldozer.size >= width) {
+        bulldozer.vx *= -1;
+      }
+      if (bulldozer.y <= 0 || bulldozer.y + bulldozer.size >= height) {
+        bulldozer.vy *= -1;
+      }
 
-      // Erase mustard where the "bucket" is
+      // Calculate angle
+      bulldozer.angle = Math.atan2(bulldozer.vy, bulldozer.vx);
+
+      // Erase mustard using destination-out
       paintCtx.globalCompositeOperation = 'destination-out';
       paintCtx.beginPath();
       paintCtx.arc(
@@ -102,19 +151,27 @@
       paintCtx.fill();
       paintCtx.globalCompositeOperation = 'source-over';
 
-      // Draw bulldozer
+      // Draw rotated bulldozer
       dozerCtx.clearRect(0, 0, width, height);
-      dozerCtx.drawImage(bulldozer.img, bulldozer.x, bulldozer.y, bulldozer.size, bulldozer.size);
+      dozerCtx.save();
+      dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
+      dozerCtx.rotate(bulldozer.angle);
+      dozerCtx.drawImage(
+        bulldozer.img,
+        -bulldozer.size / 2,
+        -bulldozer.size / 2,
+        bulldozer.size,
+        bulldozer.size
+      );
+      dozerCtx.restore();
 
-      // Check how much is cleared
+      // Reveal hidden message if enough is cleared
       const imageData = paintCtx.getImageData(0, 0, width, height);
       let transparentPixels = 0;
       for (let i = 3; i < imageData.data.length; i += 4) {
         if (imageData.data[i] === 0) transparentPixels++;
       }
-      const totalPixels = width * height;
-      const clearedRatio = transparentPixels / totalPixels;
-
+      const clearedRatio = transparentPixels / (width * height);
       if (clearedRatio > revealThreshold) {
         message.style.opacity = 1;
       }
@@ -122,8 +179,13 @@
       requestAnimationFrame(animate);
     }
 
+    // Delay bulldozer animation
     bulldozer.img.onload = () => {
-      animate();
+      setTimeout(() => {
+        preMessage.style.display = 'none';
+        bulldozerReady = true;
+        animate();
+      }, 3000);
     };
   </script>
 </body>
