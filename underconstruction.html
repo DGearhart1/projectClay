@@ -33,7 +33,7 @@
       text-align: center;
       font-size: 0.8rem;
       color: #5a3e1b;
-      background-color: rgba(210, 176, 76, 0.8); /* semi-transparent mustard */
+      background-color: rgba(210, 176, 76, 0.8);
       padding: 4px 0;
       z-index: 11;
     }
@@ -45,16 +45,13 @@
 </head>
 <body>
 
-<!-- Caution tape banners -->
 <img src="caution-tape.png" id="construction-header" alt="Construction Tape" />
 <img src="caution-tape.png" id="construction-footer" alt="Construction Tape" />
 
-<!-- Legal disclaimer -->
 <div id="disclaimer">
   This site is privately owned and is not in support of any candidate.
 </div>
 
-<!-- Canvases -->
 <canvas id="base-layer"></canvas>
 <canvas id="mustard-layer"></canvas>
 <canvas id="dozer-layer"></canvas>
@@ -81,49 +78,45 @@
 
   window.addEventListener('resize', resize);
 
-function drawBase() {
-  baseCtx.fillStyle = '#5a3e1b';
-  baseCtx.fillRect(0, 0, width, height);
+  function drawMustardOverlay() {
+    mustardCtx.fillStyle = '#d2b04c';
+    mustardCtx.fillRect(0, 0, width, height);
 
-  baseCtx.fillStyle = '#d2b04c';
-  baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
-  baseCtx.textAlign = 'center';
-  baseCtx.textBaseline = 'middle';
+    mustardCtx.fillStyle = '#5a3e1b';
+    mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
+    mustardCtx.textAlign = 'center';
+    mustardCtx.textBaseline = 'middle';
 
-  // Two-line second phrase, below the line
-  const line1 = "UNLIKE OUR";
-  const line2 = "CITY'S TRANSPARENCY";
+    // First phrase, two lines, centered near vertical center
+    mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 60);
+    mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 15);
 
-  const startY = height / 2 + 40;
-  const lineHeight = 40;
+    // Draw short horizontal line right below first phrase (between lines and second phrase)
+    const lineWidth = width * 0.3;
+    const lineX = (width - lineWidth) / 2;
+    const lineY = height / 2 + 15;
 
-  baseCtx.fillText(line1, width / 2, startY);
-  baseCtx.fillText(line2, width / 2, startY + lineHeight);
-}
+    mustardCtx.strokeStyle = '#5a3e1b';
+    mustardCtx.lineWidth = 3;
+    mustardCtx.beginPath();
+    mustardCtx.moveTo(lineX, lineY);
+    mustardCtx.lineTo(lineX + lineWidth, lineY);
+    mustardCtx.stroke();
+  }
 
-function drawMustardOverlay() {
-  mustardCtx.fillStyle = '#d2b04c';
-  mustardCtx.fillRect(0, 0, width, height);
+  function drawBase() {
+    baseCtx.fillStyle = '#5a3e1b';
+    baseCtx.fillRect(0, 0, width, height);
 
-  mustardCtx.fillStyle = '#5a3e1b';
-  mustardCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
-  mustardCtx.textAlign = 'center';
-  mustardCtx.textBaseline = 'middle';
-  mustardCtx.fillText("THIS SITE IS", width / 2, height / 2 - 70);
-  mustardCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 20);
+    baseCtx.fillStyle = '#d2b04c';
+    baseCtx.font = `bold clamp(2rem, 5vw, 3.5rem) 'Segoe UI', sans-serif`;
+    baseCtx.textAlign = 'center';
+    baseCtx.textBaseline = 'middle';
 
-  // Draw the line here (between first and second phrase)
-  const lineWidth = width * 0.3;
-  const lineX = (width - lineWidth) / 2;
-  const lineY = height / 2 + 5;
-
-  mustardCtx.strokeStyle = '#5a3e1b';
-  mustardCtx.lineWidth = 3;
-  mustardCtx.beginPath();
-  mustardCtx.moveTo(lineX, lineY);
-  mustardCtx.lineTo(lineX + lineWidth, lineY);
-  mustardCtx.stroke();
-}
+    // Second phrase split into two lines, positioned below the line on mustard layer
+    baseCtx.fillText("UNLIKE OUR", width / 2, height / 2 + 50);
+    baseCtx.fillText("CITY'S TRANSPARENCY", width / 2, height / 2 + 90);
+  }
 
   const bulldozer = {
     x: 100,
@@ -150,14 +143,14 @@ function drawMustardOverlay() {
     mustardCtx.fill();
     mustardCtx.restore();
 
-    // Redraw top line in mustard on base as it's revealed
+    // Redraw the first phrase in mustard on base layer as it gets revealed
     baseCtx.save();
     baseCtx.fillStyle = '#d2b04c';
     baseCtx.font = `bold clamp(2rem, 6vw, 4rem) 'Segoe UI', sans-serif`;
     baseCtx.textAlign = 'center';
     baseCtx.textBaseline = 'middle';
-    baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 30);
-    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 + 30);
+    baseCtx.fillText("THIS SITE IS", width / 2, height / 2 - 60);
+    baseCtx.fillText("UNDER RENOVATION", width / 2, height / 2 - 15);
     baseCtx.restore();
   }
 
@@ -165,7 +158,7 @@ function drawMustardOverlay() {
     dozerCtx.clearRect(0, 0, width, height);
     dozerCtx.save();
     dozerCtx.translate(bulldozer.x + bulldozer.size / 2, bulldozer.y + bulldozer.size / 2);
-    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI; // 90° counterclockwise
+    const angle = Math.atan2(bulldozer.vy, bulldozer.vx) - Math.PI;
     dozerCtx.rotate(angle);
     dozerCtx.drawImage(
       bulldozer.img,
@@ -198,3 +191,4 @@ function drawMustardOverlay() {
 </script>
 </body>
 </html>
+
