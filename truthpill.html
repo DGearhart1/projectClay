@@ -21,80 +21,69 @@
 
     h1 {
       font-size: clamp(1.5rem, 5vw, 2.5rem);
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       text-shadow: 0 0 10px #0ff;
     }
 
-    .pill-container {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
+    .pill-image-container {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
     }
 
-    .pill-button {
-      padding: 16px 32px;
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      border: none;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-      text-shadow: 0 0 4px #000;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
-      min-width: 180px;
+    .pill-image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 0 20px #0ff;
     }
 
-    .pill-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+    /* Placeholder clickable areas */
+    .pill-clickable {
+      position: absolute;
+      cursor: not-allowed;
+      /* transparent overlay */
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px dashed rgba(0, 255, 0, 0.5);
+      border-radius: 50%;
+      pointer-events: none; /* disable clicks */
     }
 
-    .red-pill {
-      background-color: red;
-      color: white;
+    /* We'll position these once you upload */
+    .pill-red {
+      top: 40%;
+      left: 20%;
+      width: 100px;
+      height: 100px;
+      transform: translate(-50%, -50%);
     }
 
-    .blue-pill {
-      background-color: blue;
-      color: white;
-    }
-
-    .label {
-      margin-top: 10px;
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
-      color: #ccc;
+    .pill-blue {
+      top: 40%;
+      left: 75%;
+      width: 100px;
+      height: 100px;
+      transform: translate(-50%, -50%);
     }
 
     footer {
       margin-top: 50px;
       font-size: 0.75rem;
       color: #444;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
+      user-select: none;
     }
   </style>
 </head>
 <body>
   <h1>Choose Your Reality</h1>
 
-  <div class="pill-container">
-    <div>
-      <a href="priorityschooltruth.html">
-        <button class="pill-button red-pill">Red Pill</button>
-      </a>
-      <div class="label">Click for the Truth</div>
-    </div>
+  <div class="pill-image-container">
+    <img src="truthpills.png" alt="Two hands holding a red pill and a blue pill" />
 
-    <div>
-      <a href="https://www.disney.com/" target="_blank">
-        <button class="pill-button blue-pill">Blue Pill</button>
-      </a>
-      <div class="label">Keep Believing in Unicorns & Fairies</div>
-    </div>
+    <!-- Placeholder circles over pills - no click yet -->
+    <div class="pill-clickable pill-red" title="Red Pill (click area placeholder)"></div>
+    <div class="pill-clickable pill-blue" title="Blue Pill (click area placeholder)"></div>
   </div>
 
   <footer>
