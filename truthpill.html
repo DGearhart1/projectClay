@@ -7,28 +7,38 @@
   <style>
     body {
       background-color: #000;
-      color: #fff;
+      color: #0f0;
       font-family: 'Courier New', monospace;
       margin: 0;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
       text-align: center;
     }
 
+    h1, h2 {
+      text-shadow: 0 0 10px #0f0;
+      margin: 10px 0;
+    }
+
     h1 {
       font-size: clamp(1.5rem, 5vw, 2.5rem);
+      color: #0f0;
+    }
+
+    h2 {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
       margin-bottom: 30px;
-      text-shadow: 0 0 10px #0ff;
+      font-weight: normal;
     }
 
     .pill-image-container {
       position: relative;
       width: 100%;
       max-width: 700px;
+      margin-bottom: 40px;
     }
 
     .pill-image-container img {
@@ -36,54 +46,76 @@
       height: auto;
       display: block;
       border-radius: 8px;
-      box-shadow: 0 0 20px #0ff;
+      box-shadow: 0 0 20px #0f0;
     }
 
-    /* Placeholder clickable areas */
-    .pill-clickable {
+    .pill-link {
       position: absolute;
-      cursor: not-allowed;
-      /* transparent overlay */
-      background-color: rgba(255, 255, 255, 0.1);
-      border: 2px dashed rgba(0, 255, 0, 0.5);
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0);
       border-radius: 50%;
-      pointer-events: none; /* disable clicks */
+      transition: background-color 0.3s ease;
     }
 
-    /* We'll position these once you upload */
+    .pill-link:hover {
+      background-color: rgba(0, 255, 0, 0.15);
+    }
+
     .pill-red {
-      top: 40%;
-      left: 20%;
-      width: 100px;
-      height: 100px;
+      top: 41%;
+      left: 21%;
+      width: 110px;
+      height: 110px;
       transform: translate(-50%, -50%);
     }
 
     .pill-blue {
-      top: 40%;
-      left: 75%;
-      width: 100px;
-      height: 100px;
+      top: 41%;
+      left: 76%;
+      width: 110px;
+      height: 110px;
       transform: translate(-50%, -50%);
     }
 
+    .captions {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      flex-wrap: wrap;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .caption {
+      max-width: 160px;
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      color: #99ff99;
+      text-shadow: 0 0 6px #006600;
+    }
+
     footer {
-      margin-top: 50px;
+      margin-top: auto;
       font-size: 0.75rem;
-      color: #444;
+      color: #004400;
       user-select: none;
+      padding-bottom: 20px;
     }
   </style>
 </head>
 <body>
   <h1>Choose Your Reality</h1>
+  <h2>Clay, Alabama Has A Choice To Make</h2>
 
   <div class="pill-image-container">
     <img src="truthpills.png" alt="Two hands holding a red pill and a blue pill" />
 
-    <!-- Placeholder circles over pills - no click yet -->
-    <div class="pill-clickable pill-red" title="Red Pill (click area placeholder)"></div>
-    <div class="pill-clickable pill-blue" title="Blue Pill (click area placeholder)"></div>
+    <a href="priorityschooltruth.html" class="pill-link pill-red" aria-label="Red Pill - Click for the Truth"></a>
+    <a href="https://www.disney.com/" target="_blank" rel="noopener" class="pill-link pill-blue" aria-label="Blue Pill - Keep Believing in Unicorns & Fairies"></a>
+  </div>
+
+  <div class="captions">
+    <div class="caption">Click the Red Pill for the Truth about your City</div>
+    <div class="caption">Click the Blue Pill to Keep Believing in Unicorns & Fairies</div>
   </div>
 
   <footer>
