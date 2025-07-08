@@ -24,7 +24,7 @@
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 1s;
+      animation: spin 6s linear infinite;
     }
 
     .face {
@@ -34,32 +34,23 @@
       backface-visibility: hidden;
       border-radius: 50%;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      background-size: cover;
+      background-position: center;
     }
 
     .front {
       background-image: url('SignsAndScoresCoin.png');
-      background-size: cover;
-      background-position: center;
     }
 
     .back {
       transform: rotateY(180deg);
-      background-size: cover;
-      background-position: center;
+      background-image: url('StateScoreCoin.png');
     }
 
-    .flip-button {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      font-size: 16px;
-      background: navy;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+    @keyframes spin {
+      0%   { transform: rotateY(0deg); }
+      50%  { transform: rotateY(180deg); }
+      100% { transform: rotateY(360deg); }
     }
   </style>
 </head>
@@ -68,28 +59,20 @@
   <div class="scene">
     <div class="coin" id="coin">
       <div class="face front"></div>
-      <div class="face back" id="backFace" style="background-image: url('StateScoreCoin.png');"></div>
+      <div class="face back" id="backFace"></div>
     </div>
   </div>
-  <button class="flip-button" onclick="flipCoin()">Flip Coin</button>
 
   <script>
-    const coin = document.getElementById('coin');
     const backFace = document.getElementById('backFace');
     const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
-    let showingBackIndex = 0;
-    let flipped = false;
+    let currentIndex = 0;
 
-    function flipCoin() {
-      flipped = !flipped;
-      coin.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
-      
-      // Alternate back image *after* the flip is done
-      setTimeout(() => {
-        showingBackIndex = (showingBackIndex + 1) % backImages.length;
-        backFace.style.backgroundImage = `url('${backImages[showingBackIndex]}')`;
-      }, 1000); // Matches transition duration
-    }
+    // Swap image at each half-rotation (every 3s)
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % backImages.length;
+      backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+    }, 3000); // Half of 6s spin cycle
   </script>
 
 </body>
