@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rotating Coin of Truth</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      background-color: #f9f9f4;
+      background-color: transparent; /* Make it iframe-friendly */
+      margin: 0;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -33,7 +35,7 @@
       height: 100%;
       backface-visibility: hidden;
       border-radius: 50%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
       background-size: cover;
       background-position: center;
     }
@@ -62,24 +64,22 @@
     </div>
   </div>
 
- <script>
-  const backFace = document.getElementById('backFace');
-  const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
-  let currentIndex = 0;
+  <script>
+    const backFace = document.getElementById('backFace');
+    const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
+    let currentIndex = 0;
 
-  // Initial image
-  backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+    // Initialize with first back image
+    backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
 
-  // When each rotation starts, set up a mid-cycle image swap
-  document.getElementById('coin').addEventListener('animationiteration', () => {
-    // Schedule the back-face image change for 2.7 seconds into the new spin
-    setTimeout(() => {
-      currentIndex = (currentIndex + 1) % backImages.length;
-      backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
-    }, 2700);
-  });
-</script>
-
+    document.getElementById('coin').addEventListener('animationiteration', () => {
+      // Swap back image 1 second after each full rotation starts
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % backImages.length;
+        backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+      }, 1000);
+    });
+  </script>
 
 </body>
 </html>
