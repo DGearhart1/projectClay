@@ -62,22 +62,24 @@
     </div>
   </div>
 
-  <script>
-    const backFace = document.getElementById('backFace');
-    const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
-    let currentIndex = 0;
+ <script>
+  const backFace = document.getElementById('backFace');
+  const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
+  let currentIndex = 0;
 
-    // Set initial image
-    backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+  // Initial image
+  backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
 
-    // Swap just before the back becomes visible (at 50% of the spin = 3s)
-    // So we do it at ~2.7s mark
-    setInterval(() => {
-      // Set the next image in advance
+  // When each rotation starts, set up a mid-cycle image swap
+  document.getElementById('coin').addEventListener('animationiteration', () => {
+    // Schedule the back-face image change for 2.7 seconds into the new spin
+    setTimeout(() => {
       currentIndex = (currentIndex + 1) % backImages.length;
       backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
-    }, 6000 - 300); // 5700ms (just before 3s half-turn)
-  </script>
+    }, 2700);
+  });
+</script>
+
 
 </body>
 </html>
