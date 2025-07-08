@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rotating Coin of Truth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background-color: #f9f9f4; /* Slightly off-white */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .scene {
+      width: 300px;
+      height: 300px;
+      perspective: 1000px;
+    }
+
+    .coin {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+
+    .face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .front {
+      background-image: url('SignsAndScoresCoin.png');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .flip-button {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background: navy;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scene">
+    <div class="coin" id="coin">
+      <div class="face front"></div>
+      <div class="face back" id="backFace" style="background-image: url('StateScoreCoin.png');"></div>
+    </div>
+  </div>
+  <button class="flip-button" onclick="flipCoin()">Flip Coin</button>
+
+  <script>
+    const coin = document.getElementById('coin');
+    const backFace = document.getElementById('backFace');
+    const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
+    let showingBackIndex = 0;
+    let flipped = false;
+
+    function flipCoin() {
+      flipped = !flipped;
+      coin.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      
+      // Alternate back image *after* the flip is done
+      setTimeout(() => {
+        showingBackIndex = (showingBackIndex + 1) % backImages.length;
+        backFace.style.backgroundImage = `url('${backImages[showingBackIndex]}')`;
+      }, 1000); // Matches transition duration
+    }
+  </script>
+
+</body>
+</html>
