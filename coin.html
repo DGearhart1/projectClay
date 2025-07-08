@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      background-color: #f9f9f4; /* Slightly off-white */
+      background-color: #f9f9f4;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -42,9 +42,13 @@
       background-image: url('SignsAndScoresCoin.png');
     }
 
-    .back {
+    .back1, .back2 {
       transform: rotateY(180deg);
-      background-image: url('StateScoreCoin.png');
+      display: none;
+    }
+
+    .visible {
+      display: block;
     }
 
     @keyframes spin {
@@ -59,21 +63,41 @@
   <div class="scene">
     <div class="coin" id="coin">
       <div class="face front"></div>
-      <div class="face back" id="backFace"></div>
+      <div class="face back1 visible" id="back1"></div>
+      <div class="face back2" id="back2"></div>
     </div>
   </div>
 
   <script>
-    const backFace = document.getElementById('backFace');
     const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
     let currentIndex = 0;
 
-    // Swap image at each half-rotation (every 3s)
+    const back1 = document.getElementById('back1');
+    const back2 = document.getElementById('back2');
+
+    // Preload first image
+    back1.style.backgroundImage = `url('${backImages[0]}')`;
+    back2.style.backgroundImage = `url('${backImages[1]}')`;
+
+    // Every 3 seconds, swap the visible back
     setInterval(() => {
       currentIndex = (currentIndex + 1) % backImages.length;
-      backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
-    }, 2250); // switch back before its visible
+      const nextImage = backImages[(currentIndex + 1) % backImages.length];
+
+      if (back1.classList.contains('visible')) {
+        back1.classList.remove('visible');
+        back2.classList.add('visible');
+        back2.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+        back1.style.backgroundImage = `url('${nextImage}')`; // preload
+      } else {
+        back2.classList.remove('visible');
+        back1.classList.add('visible');
+        back1.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+        back2.style.backgroundImage = `url('${nextImage}')`; // preload
+      }
+    }, 3000); // Change every half-rotation
   </script>
 
 </body>
 </html>
+
