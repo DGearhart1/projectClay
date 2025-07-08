@@ -42,13 +42,8 @@
       background-image: url('SignsAndScoresCoin.png');
     }
 
-    .back1, .back2 {
+    .back {
       transform: rotateY(180deg);
-      display: none;
-    }
-
-    .visible {
-      display: block;
     }
 
     @keyframes spin {
@@ -63,41 +58,26 @@
   <div class="scene">
     <div class="coin" id="coin">
       <div class="face front"></div>
-      <div class="face back1 visible" id="back1"></div>
-      <div class="face back2" id="back2"></div>
+      <div class="face back" id="backFace"></div>
     </div>
   </div>
 
   <script>
+    const backFace = document.getElementById('backFace');
     const backImages = ['StateScoreCoin.png', 'StateRankCoin.png'];
     let currentIndex = 0;
 
-    const back1 = document.getElementById('back1');
-    const back2 = document.getElementById('back2');
+    // Set initial image
+    backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
 
-    // Preload first image
-    back1.style.backgroundImage = `url('${backImages[0]}')`;
-    back2.style.backgroundImage = `url('${backImages[1]}')`;
-
-    // Every 3 seconds, swap the visible back
+    // Swap just before the back becomes visible (at 50% of the spin = 3s)
+    // So we do it at ~2.7s mark
     setInterval(() => {
+      // Set the next image in advance
       currentIndex = (currentIndex + 1) % backImages.length;
-      const nextImage = backImages[(currentIndex + 1) % backImages.length];
-
-      if (back1.classList.contains('visible')) {
-        back1.classList.remove('visible');
-        back2.classList.add('visible');
-        back2.style.backgroundImage = `url('${backImages[currentIndex]}')`;
-        back1.style.backgroundImage = `url('${nextImage}')`; // preload
-      } else {
-        back2.classList.remove('visible');
-        back1.classList.add('visible');
-        back1.style.backgroundImage = `url('${backImages[currentIndex]}')`;
-        back2.style.backgroundImage = `url('${nextImage}')`; // preload
-      }
-    }, 3000); // Change every half-rotation
+      backFace.style.backgroundImage = `url('${backImages[currentIndex]}')`;
+    }, 6000 - 300); // 5700ms (just before 3s half-turn)
   </script>
 
 </body>
 </html>
-
